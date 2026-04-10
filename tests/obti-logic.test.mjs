@@ -4,8 +4,8 @@ import path from 'node:path';
 import vm from 'node:vm';
 
 const rootDir = process.cwd();
-const htmlPath = path.join(rootDir, 'index.html');
-const html = fs.readFileSync(htmlPath, 'utf8');
+const appPath = path.join(rootDir, 'src', 'App.jsx');
+const source = fs.readFileSync(appPath, 'utf8');
 
 function extractLiteral(source, constName, startToken) {
   const start = source.indexOf(startToken);
@@ -62,8 +62,8 @@ function evalLiteral(literal) {
   return vm.runInNewContext(`(${literal})`, Object.create(null));
 }
 
-const questions = evalLiteral(extractLiteral(html, 'questions', 'const questions = '));
-const personalities = evalLiteral(extractLiteral(html, 'personalities', 'const personalities = '));
+const questions = evalLiteral(extractLiteral(source, 'questions', 'const questions = '));
+const personalities = evalLiteral(extractLiteral(source, 'personalities', 'const personalities = '));
 
 const validDimensions = new Set(['E_I', 'S_N', 'T_F', 'J_P']);
 const dimensionTypeIndex = {
