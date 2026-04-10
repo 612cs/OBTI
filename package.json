@@ -1,0 +1,11 @@
+{
+  "name": "obti",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/obti-logic.test.mjs && node tests/obti-random-distribution.test.mjs",
+    "test:logic": "node tests/obti-logic.test.mjs",
+    "test:distribution": "node tests/obti-random-distribution.test.mjs"
+  }
+}
