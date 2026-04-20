@@ -1,8 +1,37 @@
+import { useEffect, useRef } from 'react';
 import LikertScale from './LikertScale.jsx';
 
 export default function QuizScreen({ questions, answers, onAnswer, onSubmit }) {
   const progress = (Object.keys(answers).length / questions.length) * 100;
   const isAllQuestionsComplete = questions.every((q) => answers[q.id] !== undefined);
+  const questionsContainerRef = useRef(null);
+  const hasScrolled = useRef(false);
+
+  // 当 answers 非空时自动滚动到最后一道已回答的题目
+  useEffect(() => {
+    if (Object.keys(answers).length > 0 && !hasScrolled.current && questionsContainerRef.current) {
+      hasScrolled.current = true;
+
+      // 按题目顺序从后往前找，避免 id 类型差异导致匹配失败
+      let lastAnsweredIndex = -1;
+      for (let i = questions.length - 1; i >= 0; i -= 1) {
+        if (answers[questions[i].id] !== undefined) {
+          lastAnsweredIndex = i;
+          break;
+        }
+      }
+
+      if (lastAnsweredIndex !== -1) {
+        // 等待 DOM 渲染完成后滚动
+        setTimeout(() => {
+          const targetElement = questionsContainerRef.current?.children[lastAnsweredIndex];
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+  }, [answers, questions]);
 
   return (
     <div className="flex min-h-screen bg-white justify-center md:py-[4rem] font-zh">
@@ -17,7 +46,7 @@ export default function QuizScreen({ questions, answers, onAnswer, onSubmit }) {
           </div>
         </div>
 
-        <div className="flex flex-col px-[1rem] md:px-[4rem] py-[2.5rem] pb-[8rem] gap-[3rem] md:gap-[4rem] flex-1">
+        <div ref={questionsContainerRef} className="flex flex-col px-[1rem] md:px-[4rem] py-[2.5rem] pb-[8rem] gap-[3rem] md:gap-[4rem] flex-1">
           {questions.map((q, idx) => (
             <div key={q.id} className="flex flex-col items-center">
               <h3 className="text-[1.125rem] md:text-[1.5rem] font-bold text-slate-800 mb-[0.5rem] text-center leading-relaxed max-w-xl">
