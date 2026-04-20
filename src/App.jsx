@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   analyzeAnswers,
   calculateTypeFromAnswers,
@@ -199,7 +199,7 @@ async function generatePoster(result) {
   ctx.fillText('扫码解锁你的户外人格', 860, 1680);
 
   // Watermark
-  ctx.fillStyle = '#CBD5E1';
+  ctx.fillStyle = '#065F46';
   ctx.font = '400 24px Avenir Next, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(websiteUrl, 540, 1850);
@@ -280,6 +280,11 @@ export default function App() {
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [isSharingPoster, setIsSharingPoster] = useState(false);
+
+  // 监听 step 变化，滚动到顶部
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
 
   const shareText = useMemo(() => {
     if (!result) return '';
