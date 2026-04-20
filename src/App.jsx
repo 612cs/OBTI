@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
   analyzeAnswers,
-  baseImagePrompt,
   calculateTypeFromAnswers,
   personalities,
   questions,
@@ -9,7 +8,6 @@ import {
 
 const websiteUrl = 'https://obti.climbersheng.me';
 const qrCodeUrl = '/OBTIERWEIMA.png';
-const AVATAR_REQUEST_TIMEOUT_MS = 12000;
 
 const Icons = {
   Compass: () => (
@@ -27,29 +25,6 @@ const Icons = {
   Copy: () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
   ),
-};
-
-const avatarFallbackEmoji = {
-  INTJ: '🧭', INTP: '🧪', INFJ: '🌲', INFP: '🍄', ISTJ: '🎒', ISTP: '🧗', ESTJ: '⌚', ESTP: '⚡',
-  ISFJ: '🍳', ISFP: '📸', ESFJ: '🤝', ESFP: '🎵', ENTJ: '🗺️', ENFJ: '🔥', ENTP: '🧨', ENFP: '🎉',
-};
-
-const buildFallbackAvatarDataUrl = (type) => {
-  const emoji = avatarFallbackEmoji[type] || '🏔️';
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#064e3b" />
-      <stop offset="100%" stop-color="#1f2937" />
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="1200" fill="url(#bg)" />
-  <circle cx="600" cy="600" r="230" fill="#ffffff22" />
-  <text x="600" y="600" text-anchor="middle" dominant-baseline="central" font-size="260">${emoji}</text>
-</svg>`;
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
 
 const loadImage = (src) => new Promise((resolve, reject) => {
@@ -105,10 +80,6 @@ const downloadBlob = (blob, fileName) => {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 };
-
-const wait = (ms) => new Promise((resolve) => {
-  setTimeout(resolve, ms);
-});
 
 
 
@@ -180,11 +151,11 @@ async function generatePoster(result) {
     ctx.fill();
   }
 
-  // Type Code (e.g. INTJ)
-  ctx.fillStyle = '#065F46'; // Emerald 800
+  // Match Percentage
+  ctx.fillStyle = '#065F46';
   ctx.font = '900 120px Avenir Next, ui-sans-serif, system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(personality.obtiCode, 540, 1220);
+  ctx.fillText(`${analysis.matchPercent}%`, 540, 1220);
 
   // Personality Title
   ctx.fillStyle = '#0F172A';
@@ -308,20 +279,16 @@ export default function App() {
   const [step, setStep] = useState('welcome');
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
-  const [generationError, setGenerationError] = useState(false);
   const [isSharingPoster, setIsSharingPoster] = useState(false);
-  const [isRetryingAvatar, setIsRetryingAvatar] = useState(false);
 
   const shareText = useMemo(() => {
     if (!result) return '';
-    return `我是【${result.personality.title}】(${result.personality.obtiCode})，匹配度${result.analysis.matchPercent}% ，精准命中${result.analysis.hitCount}/15维。快来测测你的 OBTI 户外人格：${websiteUrl}`;
+    return `我是【${result.personality.title}】，匹配度${result.analysis.matchPercent}% ，精准命中${result.analysis.hitCount}/15维。快来测测你的 OBTI 户外人格：${websiteUrl}`;
   }, [result]);
 
   const startQuiz = () => {
     setAnswers({});
     setResult(null);
-    setGenerationError(false);
-    setIsSharingPoster(false);
     setStep('quiz');
   };
 
@@ -330,100 +297,25 @@ export default function App() {
   };
 
   const generateAvatar = async (type) => {
-    const promptConfig = personalities[type].prompt;
-    const fullPrompt = `${baseImagePrompt}, ${promptConfig}`;
-    const fallbackAvatar = buildFallbackAvatarDataUrl(type);
-
-    const retries = 3;
-    let delay = 800;
-
-    for (let i = 0; i < retries; i += 1) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          controller.abort();
-        }, AVATAR_REQUEST_TIMEOUT_MS);
-
-        let response;
-        try {
-          response = await fetch('/api/generate-avatar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            signal: controller.signal,
-            body: JSON.stringify({
-              prompt: fullPrompt,
-              sampleCount: 1,
-            }),
-          });
-        } finally {
-          clearTimeout(timeoutId);
-        }
-
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          const detail = typeof data?.detail === 'string' ? data.detail : `HTTP error: ${response.status}`;
-          if (data?.retryable === false) {
-            console.warn('[avatar] non-retryable generation failure', { status: response.status, detail });
-            return { avatarUrl: fallbackAvatar, isFallbackAvatar: true };
-          }
-          throw new Error(detail);
-        }
-
-        const imageBase64 = data?.imageBase64;
-        if (imageBase64) {
-          return {
-            avatarUrl: `data:image/png;base64,${imageBase64}`,
-            isFallbackAvatar: false,
-          };
-        }
-
-        throw new Error('Invalid image format');
-      } catch (error) {
-        console.warn('[avatar] generation attempt failed', { attempt: i + 1, error });
-
-        if (i === retries - 1) {
-          return { avatarUrl: fallbackAvatar, isFallbackAvatar: true };
-        }
-
-        await wait(delay);
-        delay *= 2;
-      }
-    }
-
-    return { avatarUrl: fallbackAvatar, isFallbackAvatar: true };
+    const imageFile = personalities[type].image;
+    const avatarUrl = `/images/${imageFile}`;
+    return { avatarUrl, isFallbackAvatar: false };
   };
 
   const calculateResult = async () => {
     const type = calculateTypeFromAnswers(answers);
     const personality = personalities[type];
     const analysis = analyzeAnswers(answers, type);
-    const fallbackAvatar = buildFallbackAvatarDataUrl(type);
+    const avatarState = await generateAvatar(type);
 
     setResult({
       type,
       personality,
       analysis,
-      avatarUrl: fallbackAvatar,
-      isFallbackAvatar: true,
+      avatarUrl: avatarState.avatarUrl,
     });
 
-    setStep('loading');
-    setGenerationError(false);
-
-    try {
-      const avatarState = await generateAvatar(type);
-      setResult((prev) => ({
-        ...prev,
-        avatarUrl: avatarState.avatarUrl,
-        isFallbackAvatar: avatarState.isFallbackAvatar,
-      }));
-      setGenerationError(avatarState.isFallbackAvatar);
-    } catch (error) {
-      console.error('[avatar] generation failed unexpectedly', error);
-      setGenerationError(true);
-    } finally {
-      setStep('result');
-    }
+    setStep('result');
   };
 
   const handleShareCopy = async () => {
@@ -460,30 +352,13 @@ export default function App() {
     }
   };
 
-  const handleRetryAvatar = async () => {
-    if (!result) return;
-    setIsRetryingAvatar(true);
-    setGenerationError(false);
-    try {
-      const avatarState = await generateAvatar(result.type);
-      setResult((prev) => ({
-        ...prev,
-        avatarUrl: avatarState.avatarUrl,
-        isFallbackAvatar: avatarState.isFallbackAvatar,
-      }));
-      setGenerationError(avatarState.isFallbackAvatar);
-    } finally {
-      setIsRetryingAvatar(false);
-    }
-  };
-
   const renderWelcome = () => (
     <div className="flex min-h-screen items-center justify-center bg-white p-4 md:p-[2rem]">
       <div className="flex flex-col items-center justify-center w-full max-w-[40rem] bg-white p-[2.5rem] md:p-[4rem] text-center animate-fade-in">
         <img src="/favicon.svg" alt="OBTI Logo" className="w-[6rem] h-[6rem] md:w-[8rem] md:h-[8rem] mb-[2rem] shadow-xl shadow-emerald-900/20 rounded-[1.5rem] md:rounded-[2rem]" />
         <h1 className="text-[2rem] md:text-[3rem] font-black text-emerald-900 mb-[1.5rem] tracking-tight">测测你的山野灵魂</h1>
         <p className="text-[1rem] md:text-[1.125rem] text-slate-600 mb-[2.5rem] max-w-md leading-relaxed">
-          抛开传统 MBTI，通过 30 道极度真实场景测出你的 <span className="inline-block bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md font-bold mx-1">OBTI 户外人格</span>，并生成 3D 专属形象！
+          通过 30 道极度真实的户外场景，测出你的 <span className="inline-block bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md font-bold mx-1">OBTI 户外人格</span>，并生成 3D 专属形象！
         </p>
         <button
           onClick={startQuiz}
@@ -544,14 +419,6 @@ export default function App() {
     );
   };
 
-  const renderLoading = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-[1.5rem] text-center">
-      <div className="mb-[1.5rem]"><Icons.Loader /></div>
-      <h2 className="text-[1.5rem] font-bold text-emerald-900 mb-[0.5rem]">正在生成你的 OBTI 报告...</h2>
-      <p className="text-emerald-700 animate-pulse text-[1rem]">AI 正在绘制 3D 形象并计算 15 维画像，请稍候</p>
-    </div>
-  );
-
   const renderResult = () => {
     if (!result) return null;
 
@@ -569,9 +436,9 @@ export default function App() {
 
               <div className="flex flex-col justify-between">
                 <div>
-                  <p className="text-emerald-600 font-bold text-[0.875rem] tracking-[0.2em] uppercase">OBTI Result</p>
+                  <p className="text-emerald-600 font-bold text-[0.875rem] tracking-[0.2em] uppercase">你的户外人格</p>
                   <h1 className="text-[2rem] md:text-[3rem] font-black mt-[0.5rem] leading-tight text-emerald-900">{personality.title}</h1>
-                  <p className="text-emerald-700 font-semibold text-[1.25rem] mt-[0.25rem]">{personality.obtiCode}</p>
+                  <p className="text-emerald-700 font-semibold text-[1.25rem] mt-[0.25rem]">匹配度 {analysis.matchPercent}%</p>
                 </div>
 
                 <div className="mt-[1rem] md:mt-[1.5rem] bg-emerald-50 rounded-[1rem] border border-emerald-200 px-[1.25rem] py-[1rem]">
@@ -584,19 +451,6 @@ export default function App() {
                     <span key={tag} className="bg-white border border-emerald-200 text-emerald-700 px-[0.8rem] py-[0.35rem] rounded-full text-[0.85rem] shadow-sm font-medium">#{tag}</span>
                   ))}
                 </div>
-                
-                {generationError && (
-                  <div className="mt-[1rem] rounded-[1rem] border border-purple-200 bg-purple-50 px-[1rem] py-[0.75rem] text-purple-900 text-[0.9rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <span className="font-medium">3D 生图失败，当前使用兜底图。</span>
-                    <button
-                      onClick={handleRetryAvatar}
-                      disabled={isRetryingAvatar}
-                      className="shrink-0 rounded-full bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5 text-[0.8rem] font-bold disabled:opacity-60 transition"
-                    >
-                      {isRetryingAvatar ? '重试中...' : '重试生图'}
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -697,7 +551,6 @@ export default function App() {
     <>
       {step === 'welcome' && renderWelcome()}
       {step === 'quiz' && renderQuiz()}
-      {step === 'loading' && renderLoading()}
       {step === 'result' && renderResult()}
     </>
   );

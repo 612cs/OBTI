@@ -40,7 +40,7 @@ function runTests() {
 
   for (const type of personalityKeys) {
     const p = personalities[type];
-    for (const key of ['obtiCode', 'title', 'tags', 'desc', 'prompt']) {
+    for (const key of ['image', 'title', 'tags', 'desc']) {
       assert.equal(typeof p[key], 'string', `${type}.${key} 必须是字符串`);
       assert.equal(p[key].trim().length > 0, true, `${type}.${key} 不能为空`);
     }
