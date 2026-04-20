@@ -60,6 +60,13 @@ export default function ResultScreen({
                   <span key={tag} className="bg-white border border-emerald-200 text-emerald-700 px-[0.8rem] py-[0.35rem] rounded-full text-[0.85rem] shadow-sm font-medium">#{tag}</span>
                 ))}
               </div>
+
+              <p className="text-slate-500 text-sm mt-2">
+                💡 人格是流动的，测试结果反映的是你当下的户外倾向。
+                如果感觉不太像，可能是你正处于不同的户外心境，
+                <button onClick={onRestart} className="text-emerald-600 underline">再测一次</button> 或
+                <button onClick={() => alert('查看其他类型功能开发中')} className="text-emerald-600 underline">查看其他类型</button>
+              </p>
             </div>
           </div>
         </div>
