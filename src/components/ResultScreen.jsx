@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Icons from './Icons.jsx';
 
 export default function ResultScreen({
@@ -7,6 +8,8 @@ export default function ResultScreen({
   onShareCopy,
   onRestart,
 }) {
+  const [imageStatus, setImageStatus] = useState('loading'); // 'loading', 'loaded', 'error'
+
   if (!result) return null;
 
   const { personality, analysis, avatarUrl, type } = result;
@@ -16,8 +19,26 @@ export default function ResultScreen({
       <div className="w-full max-w-[64rem] bg-white overflow-hidden animate-fade-in relative pb-[8rem] md:pb-[4rem]">
         <div className="p-[1rem] md:p-[1.25rem] bg-white text-slate-900">
           <div className="grid lg:grid-cols-[22rem_1fr] gap-[1rem] md:gap-[1.25rem] items-start">
-            <div className="rounded-[1.5rem] overflow-hidden bg-transparent  h-[330px]">
-              <img src={avatarUrl} alt={personality.title} className="w-full h-full object-cover" />
+            <div className="rounded-[1.5rem] overflow-hidden bg-transparent h-[330px] relative flex justify-center items-center">
+              {imageStatus === 'loading' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-transparent z-10">
+                  <div className="w-[2.5rem] h-[2.5rem] border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin mb-[0.75rem]"></div>
+                  <span className="text-emerald-700 font-medium text-[0.9rem] animate-pulse">图片生成中...</span>
+                </div>
+              )}
+              {imageStatus === 'error' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-transparent z-10 text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-[0.5rem]"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  <span className="text-[0.95rem] font-medium">图片加载失败</span>
+                </div>
+              )}
+              <img 
+                src={avatarUrl} 
+                alt={personality.title} 
+                className={`w-full h-full object-cover transition-opacity duration-300 ${imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+                onLoad={() => setImageStatus('loaded')}
+                onError={() => setImageStatus('error')}
+              />
             </div>
 
             <div className="flex flex-col gap-[0.75rem]">
