@@ -1,93 +1,12 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
-import vm from 'node:vm';
+import {
+  analyzeAnswers,
+  calculateTypeFromAnswers,
+  personalities,
+  questions,
+} from '../src/analysis.js';
 
-const rootDir = process.cwd();
-const appPath = path.join(rootDir, 'src', 'App.jsx');
-const source = fs.readFileSync(appPath, 'utf8');
-
-function extractLiteral(source, constName, startToken) {
-  const start = source.indexOf(startToken);
-  assert.notEqual(start, -1, `未找到常量 ${constName}`);
-
-  const literalStart = start + startToken.length;
-  let i = literalStart;
-  let depth = 0;
-  let inString = false;
-  let quote = '';
-  let escaped = false;
-
-  for (; i < source.length; i++) {
-    const ch = source[i];
-
-    if (inString) {
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (ch === '\\') {
-        escaped = true;
-        continue;
-      }
-      if (ch === quote) {
-        inString = false;
-        quote = '';
-      }
-      continue;
-    }
-
-    if (ch === '"' || ch === '\'' || ch === '`') {
-      inString = true;
-      quote = ch;
-      continue;
-    }
-
-    if (ch === '[' || ch === '{') {
-      depth++;
-      continue;
-    }
-
-    if (ch === ']' || ch === '}') {
-      depth--;
-      if (depth === 0) {
-        return source.slice(literalStart, i + 1);
-      }
-    }
-  }
-
-  throw new Error(`解析 ${constName} 失败`);
-}
-
-function evalLiteral(literal) {
-  return vm.runInNewContext(`(${literal})`, Object.create(null));
-}
-
-const questions = evalLiteral(extractLiteral(source, 'questions', 'const questions = '));
-const personalities = evalLiteral(extractLiteral(source, 'personalities', 'const personalities = '));
 const validTypes = new Set(Object.keys(personalities));
-
-function calculateType(answers) {
-  const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
-
-  for (const q of questions) {
-    const val = answers[q.id];
-    if (val === undefined) continue;
-
-    if (val > 0) {
-      scores[q.agree] += val;
-    } else if (val < 0) {
-      scores[q.disagree] += Math.abs(val);
-    }
-  }
-
-  return [
-    scores.E >= scores.I ? 'E' : 'I',
-    scores.S >= scores.N ? 'S' : 'N',
-    scores.T >= scores.F ? 'T' : 'F',
-    scores.J >= scores.P ? 'J' : 'P',
-  ].join('');
-}
 
 function createRng(seed) {
   let state = seed >>> 0;
@@ -98,14 +17,21 @@ function createRng(seed) {
 }
 
 function randomAnswer(rng) {
-  // 与页面量表一致：[-3, -2, -1, 0, 1, 2, 3]
   const values = [-3, -2, -1, 0, 1, 2, 3];
   return values[Math.floor(rng() * values.length)];
 }
 
+function percentile(values, q) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = Math.floor((sorted.length - 1) * q);
+  return sorted[idx];
+}
+
 function runSimulation(seed, sampleCount = 1000) {
   const rng = createRng(seed);
-  const counts = Object.fromEntries([...validTypes].map(t => [t, 0]));
+  const typeCounts = Object.fromEntries([...validTypes].map(t => [t, 0]));
+  const matchPercentSeries = [];
+  const hitCountSeries = [];
 
   for (let i = 0; i < sampleCount; i++) {
     const answers = {};
@@ -113,15 +39,31 @@ function runSimulation(seed, sampleCount = 1000) {
       answers[q.id] = randomAnswer(rng);
     }
 
-    const type = calculateType(answers);
+    const type = calculateTypeFromAnswers(answers);
     assert.equal(validTypes.has(type), true, `出现非法类型 ${type}`);
-    counts[type] += 1;
+    typeCounts[type] += 1;
+
+    const analysis = analyzeAnswers(answers, type);
+    assert.equal(analysis.dimensionBreakdown.length, 15, '必须返回15维分析');
+    assert.equal(analysis.matchPercent >= 0 && analysis.matchPercent <= 100, true, '匹配度越界');
+    assert.equal(analysis.hitCount >= 0 && analysis.hitCount <= 15, true, '命中维度越界');
+
+    matchPercentSeries.push(analysis.matchPercent);
+    hitCountSeries.push(analysis.hitCount);
   }
 
-  const nonZeroTypes = Object.values(counts).filter(n => n > 0).length;
-  const maxCount = Math.max(...Object.values(counts));
+  const nonZeroTypes = Object.values(typeCounts).filter(n => n > 0).length;
+  const maxTypeCount = Math.max(...Object.values(typeCounts));
 
-  return { counts, nonZeroTypes, maxCount };
+  return {
+    typeCounts,
+    nonZeroTypes,
+    maxTypeCount,
+    matchP10: percentile(matchPercentSeries, 0.1),
+    matchP90: percentile(matchPercentSeries, 0.9),
+    hitP10: percentile(hitCountSeries, 0.1),
+    hitP90: percentile(hitCountSeries, 0.9),
+  };
 }
 
 function runTests() {
@@ -133,10 +75,13 @@ function runTests() {
 
   for (const [idx, result] of results.entries()) {
     assert.equal(result.nonZeroTypes >= 12, true, `第${idx + 1}组随机样本覆盖类型过少: ${result.nonZeroTypes}`);
-    assert.equal(result.maxCount <= 400, true, `第${idx + 1}组随机样本出现异常集中: ${result.maxCount}`);
+    assert.equal(result.maxTypeCount <= 400, true, `第${idx + 1}组随机样本出现异常集中: ${result.maxTypeCount}`);
+
+    assert.equal(result.matchP90 > result.matchP10, true, `第${idx + 1}组匹配度分布异常`);
+    assert.equal(result.hitP90 > result.hitP10, true, `第${idx + 1}组命中维度分布异常`);
   }
 
-  const first = results[0].counts;
+  const first = results[0].typeCounts;
   const sorted = Object.entries(first).sort((a, b) => b[1] - a[1]);
   const top5 = sorted.slice(0, 5).map(([t, c]) => `${t}:${c}`).join(', ');
 

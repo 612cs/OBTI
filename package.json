@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:web": "vite",
+    "dev:api": "node api/server.js",
+    "dev:api:vercel": "vercel dev --listen 3000",
     "build": "vite build",
     "preview": "vite preview",
     "test": "node tests/obti-logic.test.mjs && node tests/obti-random-distribution.test.mjs",

@@ -1,138 +1,16 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
-import vm from 'node:vm';
-
-const rootDir = process.cwd();
-const appPath = path.join(rootDir, 'src', 'App.jsx');
-const source = fs.readFileSync(appPath, 'utf8');
-
-function extractLiteral(source, constName, startToken) {
-  const start = source.indexOf(startToken);
-  assert.notEqual(start, -1, `未找到常量 ${constName}`);
-
-  const literalStart = start + startToken.length;
-  let i = literalStart;
-  let depth = 0;
-  let inString = false;
-  let quote = '';
-  let escaped = false;
-
-  for (; i < source.length; i++) {
-    const ch = source[i];
-
-    if (inString) {
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (ch === '\\') {
-        escaped = true;
-        continue;
-      }
-      if (ch === quote) {
-        inString = false;
-        quote = '';
-      }
-      continue;
-    }
-
-    if (ch === '"' || ch === '\'' || ch === '`') {
-      inString = true;
-      quote = ch;
-      continue;
-    }
-
-    if (ch === '[' || ch === '{') {
-      depth++;
-      continue;
-    }
-    if (ch === ']' || ch === '}') {
-      depth--;
-      if (depth === 0) {
-        return source.slice(literalStart, i + 1);
-      }
-    }
-  }
-
-  throw new Error(`解析 ${constName} 失败`);
-}
-
-function evalLiteral(literal) {
-  return vm.runInNewContext(`(${literal})`, Object.create(null));
-}
-
-const questions = evalLiteral(extractLiteral(source, 'questions', 'const questions = '));
-const personalities = evalLiteral(extractLiteral(source, 'personalities', 'const personalities = '));
+import {
+  allTypes,
+  analyzeAnswers,
+  buildIdealAnswersForType,
+  calculateTypeFromAnswers,
+  DIMENSION_HIT_THRESHOLD,
+  dimensionProfiles,
+  personalities,
+  questions,
+} from '../src/analysis.js';
 
 const validDimensions = new Set(['E_I', 'S_N', 'T_F', 'J_P']);
-const dimensionTypeIndex = {
-  E_I: 0,
-  S_N: 1,
-  T_F: 2,
-  J_P: 3,
-};
-
-function calculateType(answers) {
-  const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
-
-  for (const q of questions) {
-    const val = answers[q.id];
-    if (val === undefined) continue;
-
-    if (val > 0) {
-      scores[q.agree] += val;
-    } else if (val < 0) {
-      scores[q.disagree] += Math.abs(val);
-    }
-  }
-
-  return [
-    scores.E >= scores.I ? 'E' : 'I',
-    scores.S >= scores.N ? 'S' : 'N',
-    scores.T >= scores.F ? 'T' : 'F',
-    scores.J >= scores.P ? 'J' : 'P',
-  ].join('');
-}
-
-function buildAnswersForType(type) {
-  const answers = {};
-
-  for (const q of questions) {
-    const dimIndex = dimensionTypeIndex[q.dimension];
-    const targetLetter = type[dimIndex];
-
-    if (q.agree === targetLetter) {
-      answers[q.id] = 3;
-    } else if (q.disagree === targetLetter) {
-      answers[q.id] = -3;
-    } else {
-      throw new Error(`题目 ${q.id} 维度映射异常`);
-    }
-  }
-
-  return answers;
-}
-
-function allTypes() {
-  const a = ['E', 'I'];
-  const b = ['S', 'N'];
-  const c = ['T', 'F'];
-  const d = ['J', 'P'];
-  const result = [];
-
-  for (const i of a) {
-    for (const j of b) {
-      for (const k of c) {
-        for (const m of d) {
-          result.push(`${i}${j}${k}${m}`);
-        }
-      }
-    }
-  }
-
-  return result;
-}
 
 function runTests() {
   // 1) 数据完整性
@@ -168,23 +46,56 @@ function runTests() {
     }
   }
 
-  // 3) 评分边界行为
-  assert.equal(calculateType({}), 'ESTJ', '空答案应按 tie-break 规则得到 ESTJ');
-  assert.equal(calculateType(Object.fromEntries(questions.map(q => [q.id, 0]))), 'ESTJ', '全中立应得到 ESTJ');
-
-  // 4) 核心目标：16 型全部可达
-  for (const type of expectedTypes) {
-    const answers = buildAnswersForType(type);
-    const actual = calculateType(answers);
-    assert.equal(actual, type, `人格 ${type} 不可达，实际得到 ${actual}`);
+  // 3) 15维映射完整性
+  assert.equal(dimensionProfiles.length, 15, '必须定义15个子维度');
+  const mappedIds = [];
+  for (const profile of dimensionProfiles) {
+    assert.equal(Array.isArray(profile.questionIds), true, `${profile.id} questionIds 必须为数组`);
+    assert.equal(profile.questionIds.length, 2, `${profile.id} 必须映射2道题`);
+    profile.questionIds.forEach((questionId) => {
+      assert.equal(Number.isInteger(questionId), true, `${profile.id} 题号必须为整数`);
+      mappedIds.push(questionId);
+    });
   }
 
-  // 5) 分页参数一致性（基于页面逻辑）
-  const questionsPerPage = 5;
-  const totalPages = Math.ceil(questions.length / questionsPerPage);
-  assert.equal(totalPages, 6, '30题 + 每页5题，应为6页');
+  const mappedSet = new Set(mappedIds);
+  assert.equal(mappedSet.size, 30, '15维映射应覆盖30道不重复题目');
+  for (let i = 1; i <= 30; i++) {
+    assert.equal(mappedSet.has(i), true, `15维映射缺少题号: ${i}`);
+  }
 
-  console.log('All tests passed: 16种人格可达，且核心逻辑与数据完整性校验通过。');
+  assert.equal(DIMENSION_HIT_THRESHOLD >= 0.5 && DIMENSION_HIT_THRESHOLD <= 1, true, '命中阈值应在合理范围');
+
+  // 4) 核心目标：16 型全部可达 + 分析边界
+  for (const type of expectedTypes) {
+    const answers = buildIdealAnswersForType(type);
+    const actual = calculateTypeFromAnswers(answers);
+    assert.equal(actual, type, `人格 ${type} 不可达，实际得到 ${actual}`);
+
+    const analysis = analyzeAnswers(answers, type);
+    assert.equal(analysis.matchPercent, 100, `${type} 理想作答匹配度应为100`);
+    assert.equal(analysis.hitCount, 15, `${type} 理想作答命中维度应为15`);
+    assert.equal(analysis.dimensionBreakdown.length, 15, `${type} 应返回15维分析`);
+
+    analysis.dimensionBreakdown.forEach((item) => {
+      assert.equal(item.score >= 0 && item.score <= 1, true, `${type} ${item.id} score范围非法`);
+      assert.equal(item.scorePercent >= 0 && item.scorePercent <= 100, true, `${type} ${item.id} scorePercent范围非法`);
+    });
+  }
+
+  // 5) 空答案和中立答案边界
+  const emptyType = calculateTypeFromAnswers({});
+  assert.equal(emptyType, 'ESTJ', '空答案应按 tie-break 规则得到 ESTJ');
+
+  const neutralAnswers = Object.fromEntries(questions.map(q => [q.id, 0]));
+  const neutralType = calculateTypeFromAnswers(neutralAnswers);
+  assert.equal(neutralType, 'ESTJ', '全中立应得到 ESTJ');
+
+  const neutralAnalysis = analyzeAnswers(neutralAnswers, neutralType);
+  assert.equal(neutralAnalysis.matchPercent >= 0 && neutralAnalysis.matchPercent <= 100, true, '中立答案匹配度范围非法');
+  assert.equal(neutralAnalysis.hitCount >= 0 && neutralAnalysis.hitCount <= 15, true, '中立答案命中维度范围非法');
+
+  console.log('All tests passed: 16型可达，15维分析映射正确，匹配度/命中维度边界正常。');
 }
 
 runTests();
