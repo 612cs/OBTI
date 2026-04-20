@@ -35,18 +35,18 @@ export async function generatePoster(result) {
   canvas.height = 1920;
 
   const ctx = canvas.getContext('2d');
-  const { personality, analysis, avatarUrl } = result;
+  const { personality, analysis, avatarUrl, type } = result;
 
   ctx.fillStyle = '#F8F9FA';
   ctx.fillRect(0, 0, 1080, 1920);
 
   ctx.fillStyle = '#0F172A';
-  ctx.font = '800 36px Avenir Next, PingFang SC, Hiragino Sans GB, sans-serif';
+  ctx.font = '900 36px "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('OBTI 户外人格测试', 540, 120);
 
   ctx.fillStyle = '#64748B';
-  ctx.font = '400 24px Avenir Next, PingFang SC, sans-serif';
+  ctx.font = '400 24px Outfit, "Noto Sans SC", sans-serif';
   ctx.fillText('DISCOVER YOUR OUTDOOR SOUL', 540, 160);
 
   ctx.beginPath();
@@ -61,13 +61,9 @@ export async function generatePoster(result) {
     const boxSize = 800;
     const avatarBox = { x: 140, y: 260, width: boxSize, height: boxSize };
 
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 40;
-    ctx.shadowOffsetY = 20;
     drawRoundedRect(ctx, avatarBox.x, avatarBox.y, avatarBox.width, avatarBox.height, 24);
-    ctx.fillStyle = '#FFF';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0)';
     ctx.fill();
-    ctx.shadowColor = 'transparent';
 
     const imageRatio = avatarImage.width / avatarImage.height;
     let drawWidth = boxSize;
@@ -95,33 +91,37 @@ export async function generatePoster(result) {
   }
 
   ctx.fillStyle = '#065F46';
-  ctx.font = '900 120px Avenir Next, ui-sans-serif, system-ui, sans-serif';
+  ctx.font = '900 120px Outfit, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(`${analysis.matchPercent}%`, 540, 1220);
 
   ctx.fillStyle = '#0F172A';
-  ctx.font = '800 64px PingFang SC, Hiragino Sans GB, sans-serif';
+  ctx.font = '800 64px "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillText(personality.title, 540, 1310);
 
+  ctx.fillStyle = '#7C3AED';
+  ctx.font = '700 34px Outfit, sans-serif';
+  ctx.fillText(type, 540, 1370);
+
   ctx.fillStyle = '#475569';
-  ctx.font = '500 32px PingFang SC, Hiragino Sans GB, sans-serif';
-  ctx.fillText(personality.tags.split(' / ').map((t) => `#${t}`).join('   '), 540, 1370);
+  ctx.font = '500 30px "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText(personality.tags.split(' / ').map((t) => `#${t}`).join('   '), 540, 1420);
 
   ctx.beginPath();
-  ctx.moveTo(140, 1430);
-  ctx.lineTo(940, 1430);
+  ctx.moveTo(140, 1465);
+  ctx.lineTo(940, 1465);
   ctx.strokeStyle = '#E2E8F0';
   ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.fillStyle = '#0F172A';
-  ctx.font = '700 36px font-serif, "Times New Roman", serif';
+  ctx.font = '700 36px "Noto Sans SC", "PingFang SC", "Microsoft YaHei", serif';
   ctx.textAlign = 'left';
-  ctx.fillText('核心特质', 140, 1500);
+  ctx.fillText('核心特质', 140, 1535);
 
   ctx.fillStyle = '#334155';
-  ctx.font = '400 32px PingFang SC, Hiragino Sans GB, sans-serif';
-  let yPos = 1560;
+  ctx.font = '400 32px "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif';
+  let yPos = 1595;
   analysis.strengths.slice(0, 3).forEach((item) => {
     ctx.fillText(`• ${item.name}`, 140, yPos);
     yPos += 50;
@@ -131,12 +131,12 @@ export async function generatePoster(result) {
   ctx.drawImage(qrImage, 780, 1480, 160, 160);
 
   ctx.fillStyle = '#64748B';
-  ctx.font = '400 24px PingFang SC, sans-serif';
+  ctx.font = '400 24px "Noto Sans SC", "PingFang SC", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('扫码解锁你的户外人格', 860, 1680);
 
   ctx.fillStyle = '#065F46';
-  ctx.font = '400 24px Avenir Next, sans-serif';
+  ctx.font = '400 24px Outfit, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(websiteUrl, 540, 1850);
 

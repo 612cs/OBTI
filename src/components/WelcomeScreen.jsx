@@ -2,7 +2,7 @@ import Icons from './Icons.jsx';
 
 export default function WelcomeScreen({ onStart }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4 md:p-[2rem]">
+    <div className="flex min-h-screen items-center justify-center bg-white p-4 md:p-[2rem] font-zh">
       <div className="flex flex-col items-center justify-center w-full max-w-[40rem] bg-white p-[2.5rem] md:p-[4rem] text-center animate-fade-in">
         <img src="/favicon.svg" alt="OBTI Logo" className="w-[6rem] h-[6rem] md:w-[8rem] md:h-[8rem] mb-[2rem] shadow-xl shadow-emerald-900/20 rounded-[1.5rem] md:rounded-[2rem]" />
         <h1 className="text-[2rem] md:text-[3rem] font-black text-emerald-900 mb-[1.5rem] tracking-tight">测测你的山野灵魂</h1>

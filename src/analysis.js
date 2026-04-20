@@ -34,22 +34,22 @@ export const questions = [
 export const baseImagePrompt = 'A 3D cartoon anime style character illustration of a, beautiful outdoor scenery background, high quality, 8k resolution, vibrant colors, unreal engine 5 render, cute and stylized, popmart style figure, cinematic lighting, full body shot';
 
 export const personalities = {
-  INTJ: { image: 'wdfz-explorer.png', title: '未登峰探索者', tags: '战术大师 / 路线规划狂 / 深藏不露', desc: '极度理性，享受孤独。对成熟路线没兴趣，热衷于在等高线地图上寻找未知垭口。为了一个未登峰，可以默默准备半年。' },
-  INTP: { image: 'jzql-ultralight.png', title: '极致轻量化选手', tags: '装备极客 / 克克计较 / 科技玩家', desc: '为了把基础包重降到3kg以内，可以把牙刷柄锯断、不用帐篷睡天幕。脑子里装满了各种高分子材料和装备参数。' },
-  INFJ: { image: 'sycs-pilgrim.png', title: '山野朝圣者', tags: '环保主义 / LNT无痕山林 / 灵魂共鸣', desc: '把户外视为一种修行。极度爱护环境，经常捡垃圾，还会对着古树进行深度哲学思考。在山里寻找的是内心的平静。' },
-  INFP: { image: 'mlzx-philosopher.png', title: '迷路哲学家', tags: '精神内耗治愈 / 随波逐流 / 细节控', desc: '最容易在森林里发呆掉队的人。走着走着就会被一朵奇怪的蘑菇吸引。没有明确目的地，爬山全凭当天的感觉。' },
-  ISTJ: { image: 'zzds-heavy.png', title: '重装大神', tags: '体能怪物 / 移动储物间 / 风雨无阻', desc: '山里最可靠的存在。永远背着60L+的重装大包，里面甚至有铁锅和西瓜。极度自律，严格按路书行进，从不抱怨。' },
-  ISTP: { image: 'dpzr-climber.png', title: '独攀之人', tags: '技术流 / 攀冰狂热者 / 机械师', desc: '比起徒步，更喜欢需要技术的硬核运动：阿式攀登、先锋攀岩。话不多，但技术极其扎实，绳结打得比谁都好。' },
-  ESTJ: { image: 'mgjg-coach.png', title: '魔鬼教官', tags: '配速狂魔 / 数据控 / FKT收割机', desc: '永远在看运动手表上的心率和配速，热衷刷赛段冠军。组织的局通常非常虐，上了他们的车就别想停下来拍照。' },
-  ESTP: { image: 'qlkt-athlete.png', title: '强驴 / 狂徒', tags: '体能无限 / 冲山王者 / 极限边缘', desc: '天生的运动健将，不管什么局都能无缝切入。热爱速度与激情，喜欢刺激的速降，经常上演”一天速穿”的奇迹。' },
-  ISFJ: { image: 'gsdc-chef.png', title: '高山大厨', tags: '团队妈妈 / 移动补给站 / 百宝箱', desc: '团队里神一般的存在！能从包里掏出现切和牛和手冲咖啡。极度照顾他人，带了各种药品，有他们在永远充满安全感。' },
-  ISFP: { image: 'sxmx-aesthete.png', title: '山系美学家', tags: '出片狂人 / 日系机能风 / 氛围感', desc: '装备不一定最轻，但一定最好看。搭帐篷必须拉得四角平整，挂上氛围灯。户外对他们来说是一场大型的生活方式展示。' },
-  ESFJ: { image: 'wpsd-sweeper.png', title: '王牌收队', tags: '暖心大白 / 永不抛弃 / 情绪价值', desc: '世界上最靠谱的收队。脾气极好，永远走在队伍最后陪着新手。帮你背包递水，放着欢快的音乐鼓励你前行。' },
-  ESFP: { image: 'ydpd-party.png', title: '营地派对王', tags: '社牛 / 随身DJ / 气氛担当', desc: '有他们在就不会冷场。包里绝对带了蓝牙音箱和酒，能在营地迅速和所有人打成一片，拉着隔壁营地的人一起蹦迪。' },
-  ENTJ: { image: 'txld-leader.png', title: '铁血领队', tags: '控场大师 / 绝对权威 / 安全把控', desc: '天生的商业队大统领。计划周密，掌控全局，雷厉风行。遇到危险会果断下达强制下撤的命令，毫无商量余地。' },
-  ENFJ: { image: 'hwzw-counselor.png', title: '户外政委', tags: '鸡汤大师 / 团队粘合剂 / 精神领袖', desc: '领队的好帮手，极度关心队员心理状态。能在大家爬绝望坡快要崩溃的时候，灌注源源不断的”精神氮泵”。' },
-  ENTP: { image: 'ylzj-explorer.png', title: '野路子寻怪专家', tags: '不走寻常路 / 好奇心爆棚 / 作死边缘', desc: '常规路线太无聊了，总是喜欢看地图找捷径。经常带队钻进齐腰深的箭竹林，虽然狼狈，但总能发现不一样的风景。' },
-  ENFP: { image: 'hwsz-twins.png', title: '户外双子星', tags: '三分钟热度 / 全能杂家 / 什么都想玩', desc: '兴趣广泛到了极点。春天越野跑，夏天去潜水，冬天去攀冰。今天是冲锋陷阵的先锋，明天就变成了摆烂看风景的咸鱼。' },
+  EXPL: { image: 'wdfz-explorer.png', title: '未登峰探索者', tags: '战术大师 / 路线规划狂 / 深藏不露', desc: '极度理性，享受孤独。对成熟路线没兴趣，热衷于在等高线地图上寻找未知垭口。为了一个未登峰，可以默默准备半年。' },
+  GEEK: { image: 'jzql-ultralight.png', title: '极致轻量化选手', tags: '装备极客 / 克克计较 / 科技玩家', desc: '为了把基础包重降到3kg以内，可以把牙刷柄锯断、不用帐篷睡天幕。脑子里装满了各种高分子材料和装备参数。' },
+  SAGE: { image: 'sycs-pilgrim.png', title: '山野朝圣者', tags: '环保主义 / LNT无痕山林 / 灵魂共鸣', desc: '把户外视为一种修行。极度爱护环境，经常捡垃圾，还会对着古树进行深度哲学思考。在山里寻找的是内心的平静。' },
+  POET: { image: 'mlzx-philosopher.png', title: '迷路哲学家', tags: '精神内耗治愈 / 随波逐流 / 细节控', desc: '最容易在森林里发呆掉队的人。走着走着就会被一朵奇怪的蘑菇吸引。没有明确目的地，爬山全凭当天的感觉。' },
+  PACK: { image: 'zzds-heavy.png', title: '重装大神', tags: '体能怪物 / 移动储物间 / 风雨无阻', desc: '山里最可靠的存在。永远背着60L+的重装大包，里面甚至有铁锅和西瓜。极度自律，严格按路书行进，从不抱怨。' },
+  TECH: { image: 'dpzr-climber.png', title: '独攀之人', tags: '技术流 / 攀冰狂热者 / 机械师', desc: '比起徒步，更喜欢需要技术的硬核运动：阿式攀登、先锋攀岩。话不多，但技术极其扎实，绳结打得比谁都好。' },
+  COACH: { image: 'mgjg-coach.png', title: '速穿大佬', tags: '配速狂魔 / 数据控 / FKT收割机', desc: '永远在看运动手表上的心率和配速，热衷刷赛段冠军。组织的局通常非常虐，上了他们的车就别想停下来拍照。' },
+  RUSH: { image: 'qlkt-athlete.png', title: '强驴', tags: '体能无限 / 冲山王者 / 极限边缘', desc: '天生的运动健将，不管什么局都能无缝切入。热爱速度与激情，喜欢刺激的速降，经常上演”一天速穿”的奇迹。' },
+  CHEF: { image: 'gsdc-chef.png', title: '高山大厨', tags: '团队妈妈 / 移动补给站 / 百宝箱', desc: '团队里神一般的存在！能从包里掏出现切和牛和手冲咖啡。极度照顾他人，带了各种药品，有他们在永远充满安全感。' },
+  VIBE: { image: 'sxmx-aesthete.png', title: '户外名媛', tags: '出片狂人 / 日系机能风 / 氛围感', desc: '装备不一定最轻，但一定最好看。搭帐篷必须拉得四角平整，挂上氛围灯。户外对他们来说是一场大型的生活方式展示。' },
+  GUARD: { image: 'wpsd-sweeper.png', title: '王牌收队', tags: '暖心大白 / 永不抛弃 / 情绪价值', desc: '世界上最靠谱的收队。脾气极好，永远走在队伍最后陪着新手。帮你背包递水，放着欢快的音乐鼓励你前行。' },
+  PARTY: { image: 'ydpd-party.png', title: '营地派对王', tags: '社牛 / 随身DJ / 气氛担当', desc: '有他们在就不会冷场。包里绝对带了蓝牙音箱和酒，能在营地迅速和所有人打成一片，拉着隔壁营地的人一起蹦迪。' },
+  LEAD: { image: 'txld-leader.png', title: '领队', tags: '控场大师 / 绝对权威 / 安全把控', desc: '天生的商业队大统领。计划周密，掌控全局，雷厉风行。遇到危险会果断下达强制下撤的命令，毫无商量余地。' },
+  SOUL: { image: 'hwzw-counselor.png', title: '团宠', tags: '鸡汤大师 / 团队粘合剂 / 精神领袖', desc: '领队的好帮手，极度关心队员心理状态。能在大家爬绝望坡快要崩溃的时候，灌注源源不断的”精神氮泵”。' },
+  WILD: { image: 'ylzj-explorer.png', title: '野路子专家', tags: '不走寻常路 / 好奇心爆棚 / 作死边缘', desc: '常规路线太无聊了，总是喜欢看地图找捷径。经常带队钻进齐腰深的箭竹林，虽然狼狈，但总能发现不一样的风景。' },
+  MULTI: { image: 'hwsz-twins.png', title: '装备党', tags: '三分钟热度 / 全能杂家 / 什么都想玩', desc: '兴趣广泛到了极点。春天越野跑，夏天去潜水，冬天去攀冰。今天是冲锋陷阵的先锋，明天就变成了摆烂看风景的咸鱼。' },
 };
 
 export const DIMENSION_HIT_THRESHOLD = 0.65;
@@ -79,16 +79,33 @@ const typeIndexByDimension = {
   J_P: 3,
 };
 
+// MBTI 维度到户外人格代码的映射
+const mbtiToCode = {
+  INTJ: 'EXPL',
+  INTP: 'GEEK',
+  INFJ: 'SAGE',
+  INFP: 'POET',
+  ISTJ: 'PACK',
+  ISTP: 'TECH',
+  ESTJ: 'COACH',
+  ESTP: 'RUSH',
+  ISFJ: 'CHEF',
+  ISFP: 'VIBE',
+  ESFJ: 'GUARD',
+  ESFP: 'PARTY',
+  ENTJ: 'LEAD',
+  ENFJ: 'SOUL',
+  ENTP: 'WILD',
+  ENFP: 'MULTI',
+};
+
+// 代码到 MBTI 的反向映射
+const codeToMbti = Object.fromEntries(Object.entries(mbtiToCode).map(([k, v]) => [v, k]));
+
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 export function allTypes() {
-  const a = ['E', 'I'];
-  const b = ['S', 'N'];
-  const c = ['T', 'F'];
-  const d = ['J', 'P'];
-  const result = [];
-  for (const i of a) for (const j of b) for (const k of c) for (const m of d) result.push(`${i}${j}${k}${m}`);
-  return result;
+  return Object.keys(personalities);
 }
 
 export function calculateTypeFromAnswers(answers) {
@@ -100,17 +117,20 @@ export function calculateTypeFromAnswers(answers) {
     else if (val < 0) scores[q.disagree] += Math.abs(val);
   }
 
-  return [
+  const mbtiType = [
     scores.E >= scores.I ? 'E' : 'I',
     scores.S >= scores.N ? 'S' : 'N',
     scores.T >= scores.F ? 'T' : 'F',
     scores.J >= scores.P ? 'J' : 'P',
   ].join('');
+
+  return mbtiToCode[mbtiType];
 }
 
-export function getIdealAnswerForQuestion(question, type) {
+export function getIdealAnswerForQuestion(question, code) {
+  const mbtiType = codeToMbti[code];
   const idx = typeIndexByDimension[question.dimension];
-  const target = type[idx];
+  const target = mbtiType[idx];
   return question.agree === target ? 3 : -3;
 }
 

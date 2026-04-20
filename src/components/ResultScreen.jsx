@@ -9,21 +9,23 @@ export default function ResultScreen({
 }) {
   if (!result) return null;
 
-  const { personality, analysis, avatarUrl } = result;
+  const { personality, analysis, avatarUrl, type } = result;
 
   return (
-    <div className="flex min-h-screen bg-white items-start justify-center px-[0.5rem] py-[1.25rem] md:px-[2rem] md:py-[2rem]">
+    <div className="flex min-h-screen bg-white items-start justify-center px-[0.5rem] py-[1.25rem] md:px-[2rem] md:py-[2rem] font-zh">
       <div className="w-full max-w-[64rem] bg-white overflow-hidden animate-fade-in relative pb-[8rem] md:pb-[4rem]">
         <div className="p-[1rem] md:p-[2rem] bg-white text-slate-900 border-b border-emerald-100">
           <div className="grid lg:grid-cols-[22rem_1fr] gap-[1.25rem] md:gap-[2rem] items-stretch">
-            <div className="rounded-[1.5rem] overflow-hidden bg-emerald-50 border border-emerald-200 min-h-[17rem] md:min-h-[22rem] shadow-sm">
+            <div className="rounded-[1.5rem] overflow-hidden bg-transparent min-h-[17rem] md:min-h-[22rem]">
               <img src={avatarUrl} alt={personality.title} className="w-full h-full object-cover" />
             </div>
 
             <div className="flex flex-col justify-between">
               <div>
-                <p className="text-emerald-600 font-bold text-[0.875rem] tracking-[0.2em] uppercase">你的户外人格</p>
-                <h1 className="text-[2rem] md:text-[3rem] font-black mt-[0.5rem] leading-tight text-emerald-900">{personality.title}</h1>
+                <div className="flex items-end gap-[0.6rem] mt-[0.5rem]">
+                  <h1 className="text-[2rem] md:text-[3rem] font-black leading-tight text-emerald-900">{personality.title}</h1>
+                  <span className="inline-flex items-center bg-purple-50 text-purple-600 border border-purple-200 rounded-[0.6rem] px-[0.55rem] py-[0.2rem] text-[0.8rem] md:text-[0.9rem] font-bold mb-[0.25rem]">{type}</span>
+                </div>
                 <p className="text-emerald-700 font-semibold text-[1.25rem] mt-[0.25rem]">匹配度 {analysis.matchPercent}%</p>
               </div>
 
@@ -122,7 +124,7 @@ export default function ResultScreen({
           </button>
           <button
             onClick={onRestart}
-            className="flex items-center justify-center gap-1.5 sm:gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-[0.75rem] sm:px-[1.5rem] py-[0.85rem] rounded-full font-bold transition md:flex-none md:w-[13rem] md:mt-0 w-full md:w-auto whitespace-nowrap text-[0.95rem] md:text-[1.05rem]"
+            className="flex items-center justify-center gap-1.5 sm:gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-[0.75rem] sm:px-[1.5rem] py-[0.85rem] rounded-full font-bold transition md:flex-none md:w-[13rem] md:mt-0 w-full whitespace-nowrap text-[0.95rem] md:text-[1.05rem]"
           >
             <Icons.Refresh />
             再测一次

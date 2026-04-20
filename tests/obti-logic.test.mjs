@@ -85,11 +85,11 @@ function runTests() {
 
   // 5) 空答案和中立答案边界
   const emptyType = calculateTypeFromAnswers({});
-  assert.equal(emptyType, 'ESTJ', '空答案应按 tie-break 规则得到 ESTJ');
+  assert.equal(emptyType, 'COACH', '空答案应按 tie-break 规则得到 COACH');
 
   const neutralAnswers = Object.fromEntries(questions.map(q => [q.id, 0]));
   const neutralType = calculateTypeFromAnswers(neutralAnswers);
-  assert.equal(neutralType, 'ESTJ', '全中立应得到 ESTJ');
+  assert.equal(neutralType, 'COACH', '全中立应得到 COACH');
 
   const neutralAnalysis = analyzeAnswers(neutralAnswers, neutralType);
   assert.equal(neutralAnalysis.matchPercent >= 0 && neutralAnalysis.matchPercent <= 100, true, '中立答案匹配度范围非法');

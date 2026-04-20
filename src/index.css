@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://chinese-font.netlify.app/packages/zkhlw/dist/%E7%AB%99%E9%85%B7%E5%BF%AB%E4%B9%90%E4%BD%93/result.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,7 +15,17 @@ body {
   margin: 0;
   background: #ffffff;
   color: #0f172a;
-  font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: "Outfit", "站酷快乐体", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 英文优先使用 Outfit */
+.font-en {
+  font-family: "Outfit", sans-serif;
+}
+
+/* 中文优先使用站酷快乐体 */
+.font-zh {
+  font-family: "站酷快乐体", "Outfit", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 @keyframes fadeIn {

@@ -5,7 +5,7 @@ export default function QuizScreen({ questions, answers, onAnswer, onSubmit }) {
   const isAllQuestionsComplete = questions.every((q) => answers[q.id] !== undefined);
 
   return (
-    <div className="flex min-h-screen bg-white justify-center md:py-[4rem]">
+    <div className="flex min-h-screen bg-white justify-center md:py-[4rem] font-zh">
       <div className="flex flex-col w-full min-h-screen md:min-h-0 md:max-w-[48rem] bg-white animate-fade-in relative">
         <div className="sticky top-0 bg-white/95 backdrop-blur-md z-20 px-[1.5rem] md:px-[2.5rem] py-[1rem] border-b border-slate-100">
           <div className="flex justify-between items-end mb-[0.75rem]">
